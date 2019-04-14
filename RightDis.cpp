@@ -1,10 +1,7 @@
-#include <librealsense2/rs.hpp>
+#include "stdafx.h"
+#include <librealsense2\rs.hpp>
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui.hpp"
-#include <ros/ros.h>
-//#include "geometry_msgs/Vector3.h"
-#include "std_msgs/Float32.h"
-
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -13,6 +10,18 @@
 
 using namespace cv;
 using namespace std;
+
+//default capture width and height
+const int FRAME_WIDTH = 640;
+const int FRAME_HEIGHT = 480;
+
+string intToString(int number) {
+
+
+	std::stringstream ss;
+	ss << number;
+	return ss.str();
+}
 
 void drawObject(int x, int y, Mat &frame) {
 
@@ -43,14 +52,9 @@ void drawObject(int x, int y, Mat &frame) {
 
 
 
-int main(int argc, char * argv[]) 
+
+int main(int argc, char * argv[])
 {
-
-    ros::init(argc, argv, "CamDistance");
-    ros::NodeHandle N;
-
-    ros::Publisher CamDist_pub = N.advertise<std_msgs::Float32>("CamDist", 1);
-    ros::Rate loop_rate(100);
 
 	bool work = true;
 	// Create a pipeline to easily configure and start the camera
@@ -73,15 +77,12 @@ int main(int argc, char * argv[])
 
 		rs2::frame color = frameset.get_color_frame();
 
-	
+
 		Mat Gray;
 		Mat edges;
 
-		const int w = color.as<rs2::video_frame>().get_width();
-		const int h = color.as<rs2::video_frame>().get_height();
+		Mat frame(Size(FRAME_WIDTH, FRAME_HEIGHT), CV_8UC3, (void*)color.get_data(), Mat::AUTO_STEP);
 
-		Mat frame(Size(w,h), CV_8UC3, (void*)color.get_data(), Mat::AUTO_STEP);
-		
 
 		cvtColor(frame, edges, COLOR_BGR2GRAY);
 		GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
@@ -146,16 +147,9 @@ int main(int argc, char * argv[])
 			cout << " X = " << x << "\n";
 			cout << " Y = " << y << "\n";
 
+			drawObject(x, y, im_with_keypoints2);
 			float distance = depth2.get_distance(x, y);
 			cout << " Distance = " << distance << "meters" << "\n";
-			drawObject(x, y, im_with_keypoints);
-
-
-			std_msgs::Float32 msg;
-                        msg.data = distance;
-                        CamDist_pub.publish(msg);
-                        ros::spinOnce();
-                        loop_rate.sleep();
 
 		}
 
