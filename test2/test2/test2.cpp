@@ -38,22 +38,9 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 		if (!path.empty() && !classlabel.empty()) {
 			images.push_back(imread(path, 0));
 			labels.push_back(atoi(classlabel.c_str()));
-			//resize(images, ReImages, cv::Size(3000, 4000));
 		}
 	}
 }
-
-// List of tracker types in OpenCV 3.4.1
-//string trackerTypes[8] = { "BOOSTING", "MIL", "KCF", "TLD","MEDIANFLOW", "GOTURN", "MOSSE", "CSRT" };
-// vector <string> trackerTypes(types, std::end(types));
-
- // create a tracker object
-//Ptr<Tracker> tracker = TrackerKCF::create();
-
-//Ptr<Tracker> tracker;
-
-
-//face verification
 
 int main(int argc, const char *argv[])
 {
@@ -73,38 +60,39 @@ int main(int argc, const char *argv[])
 		// nothing more we can do
 		exit(1);
 	}
-	// Quit if there are not enough images for this demo.
+	// Quit if there are not enough images for this.
 	if (images.size() <= 1) {
 		string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
 		CV_Error(Error::StsBadArg, error_message);
 	}
-
+	//Used for resizing images later
 	int im_width = images[0].cols;
 	int im_height = images[0].rows;
 
 	// Create a new Fisherfaces model and retain all available Fisherfaces,
 	// this is the most common usage of this specific FaceRecognizer:
-	//Ptr<face::FaceRecognizer> model = face::FisherFaceRecognizer::create();
 	Ptr<face::FisherFaceRecognizer> model = face::FisherFaceRecognizer::create();
-	cout << "hello9";
-	//string name = model->name();
+	
+	//Train recognizer model
 	model->train(images, labels);
 
+	//Get video stream from webcam
 	VideoCapture cap(0);
 	if (!cap.isOpened()) { //check if video device has been initialised
 		cout << "cannot open camera";
 	}
+	//Initialize classifier
 	CascadeClassifier face_cascade;
 	face_cascade.load("D:\\VS_projects\\test2\\haarcascades\\haarcascade_frontalface_alt2.xml");
-	cout << "hello20";
+
 	namedWindow("video", WINDOW_AUTOSIZE);
 
 
 	// Now updating the model is as easy as calling:
 	//model->update(newImages, newLabels);
 
-	//unconditional loop
-	while (&VideoCapture::isOpened) {
+	//conditional loop
+	while (&VideoCapture::isOpened) { //Only do stuff if the camera is running
 		Mat cameraFrame;
 		Mat grayscale;
 		vector<Rect> faces;
@@ -114,23 +102,22 @@ int main(int argc, const char *argv[])
 		cap.read(cameraFrame);
 		cvtColor(cameraFrame, grayscale, COLOR_BGR2GRAY);
 		
-		face_cascade.detectMultiScale(grayscale, faces, 1.1, 2, CASCADE_FIND_BIGGEST_OBJECT, Size(80, 80));
+		//Detect faces in grayscale frames, and store them in vector faces
+		face_cascade.detectMultiScale(grayscale, faces, 1.1, 2, CASCADE_FIND_BIGGEST_OBJECT, Size(80, 80)); 
 		printf("%zd face(s) are found.\n", faces.size());
 
+		//For-loop for running through all the detected faces
 		for (int i = 0; i < faces.size(); i++) {
 			Rect r = faces[i];
-			Mat face = grayscale(r);
+			Mat face = grayscale(r); //Making detected faces grayscale
 
-			Mat face_resized;
-			cv::resize(face, face_resized, Size(im_width, im_height), 1.0, 1.0, INTER_CUBIC);
-			int prediction = model->predict(face_resized);
-			//int predicted_label = 2;
-			//double predicted_confidence = 0.0;
-				//model->predict(face_resized,predicted_label,predicted_confidence);
+			Mat face_resized; //Variable for holding resized images
+			cv::resize(face, face_resized, Size(im_width, im_height), 1.0, 1.0, INTER_CUBIC); //FisherRecognizer need images to be same size
+			int prediction = model->predict(face_resized); //Predic label of face
 
-
+			//Draw a rectangle around detected faces
 			rectangle(cameraFrame, Point(cvRound(r.x*scale), cvRound(r.y*scale)), Point(cvRound((r.x + r.width - 1)*scale), cvRound((r.y + r.height - 1)*scale)), color, 3, 8, 0);
-			string box_text = format("Prediction = %d", prediction);
+			string box_text = format("Prediction = %d", prediction); //text to put on the rectangle
 			printf("a face is found at Rect(%d,%d,%d,%d). Prediction: %d.\n", r.x, r.y, r.width, r.height, prediction);
 			// Calculate the position for annotated text (make sure we don't
 		   // put illegal values in there):
@@ -149,24 +136,9 @@ int main(int argc, const char *argv[])
 
 		}
 
-		
-
-		//rectangle(cameraFrame, cvPoint(cvRound(r.x*scale), cvRound(r.y*scale)), cvPoint(cvRound((r.x + r.width - 1)*scale), cvRound((r.y + r.height - 1)*scale)), color, 3, 8, 0);
-		//imshow("cam", cameraFrame);
 		imshow("video", cameraFrame);
 		if (waitKey(30) >= 0)
 			break;
 	}
 	return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
