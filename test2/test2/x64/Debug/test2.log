@@ -1,0 +1,3 @@
+﻿  test2.cpp
+d:\vs_projects\test2\test2\test2.cpp(140): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  test2.vcxproj -> D:\VS_projects\test2\x64\Debug\test2.exe
