@@ -120,10 +120,10 @@ int main(int argc, char * argv[]) try
 	model->train(images, labels);
 
 	//Get video stream from webcam
-	VideoCapture cap(0);
-	if (!cap.isOpened()) { //check if video device has been initialised
-		cout << "cannot open camera";
-	}
+	//VideoCapture cap(0);
+	//if (!cap.isOpened()) { //check if video device has been initialised
+		//cout << "cannot open camera";
+	//}
 	//Initialize classifier
 	CascadeClassifier face_cascade;
 	face_cascade.load("D:\\VS_projects\\test2\\haarcascades\\haarcascade_frontalface_alt2.xml");
@@ -193,9 +193,9 @@ int main(int argc, char * argv[]) try
 		vector<Rect> faces;
 		
 		Scalar color = Scalar(255, 0, 0); // Color for Drawing tool
-		while (!cap.read(cameraFrame));
-		cap.read(cameraFrame);
-		cvtColor(cameraFrame, grayscale, COLOR_BGR2GRAY);
+		//while (!cap.read(cameraFrame));
+		//cap.read(cameraFrame);
+		cvtColor(frame, grayscale, COLOR_BGR2GRAY);
 		
 		//Detect faces in grayscale frames, and store them in vector faces
 		face_cascade.detectMultiScale(grayscale, faces, 1.1, 2, CASCADE_FIND_BIGGEST_OBJECT, Size(80, 80)); 
@@ -215,7 +215,7 @@ int main(int argc, char * argv[]) try
 			model->predict(face_resized, predicted_label, predicted_confidence);
 			
 			//Draw a rectangle around detected faces
-			rectangle(cameraFrame, Point(cvRound(r.x*scale), cvRound(r.y*scale)), Point(cvRound((r.x + r.width - 1)*scale), cvRound((r.y + r.height - 1)*scale)), color, 3, 8, 0);
+			rectangle(frame, Point(cvRound(r.x*scale), cvRound(r.y*scale)), Point(cvRound((r.x + r.width - 1)*scale), cvRound((r.y + r.height - 1)*scale)), color, 3, 8, 0);
 			
 			float center_x = (r.x + (r.x + r.width)) / 2;
 			float center_y = (r.y + (r.y + r.height)) / 2;
@@ -236,7 +236,7 @@ int main(int argc, char * argv[]) try
 			int pos_x = max(r.tl().x - 10, 0);
 			int pos_y = max(r.tl().y - 10, 0);
 			// And now put it into the image:
-			putText(cameraFrame, box_text, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0, 255, 0), 2.0);
+			putText(frame, box_text, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0, 255, 0), 2.0);
 
 			if (predicted_label == 2 && predicted_confidence < 4000) {
 				cout << "Keep driving" << endl;
@@ -248,7 +248,7 @@ int main(int argc, char * argv[]) try
 
 		}
 
-		imshow("video", cameraFrame);
+		imshow("video", frame);
 		if (waitKey(30) >= 0)
 			break;
 
