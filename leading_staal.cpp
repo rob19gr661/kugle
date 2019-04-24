@@ -17,7 +17,7 @@ nav_msgs::Odometry turtlebot_odom_pose;
 	geometry_msgs::Twist vel_msg;
 
 int staal = 2;
-
+int count = 0;
 
 void move(double speedmove, double distance);
 bool GoToGoal(nav_msgs::Odometry  goal_pose, double distance_tolerance);
@@ -70,7 +70,7 @@ printf("speed\t\tcurrent_distance camdist\t mean\t\tis\t\tcounter\n");
     //distance = speed*time
 
     
-    distance = 4;
+    distance = 8;
 
 move(speed, distance);
 
