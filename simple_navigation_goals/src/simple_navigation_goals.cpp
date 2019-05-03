@@ -12,8 +12,7 @@
 #include <stdlib.h>
 
 using namespace std;
-//ros::Subscriber distance_sub;
-//typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+
 
 float camdist; 
 float max_person_velocity = 0.3;
@@ -24,7 +23,7 @@ float max_far_distance = 2.0;
 class SendGoal {
 
 private:
-ros::Subscriber distance_sub;
+ros::Subscriber distance_sub; //, getgoal_sub;
 actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 move_base_msgs::MoveBaseGoal goal;
 bool isGuidingActive = false;
@@ -44,6 +43,10 @@ SendGoal::SendGoal() :  MoveBaseClient("move_base", true){
   ros::NodeHandle n;
   distance_sub = n.subscribe("CamDist", 100, &SendGoal::cameradistance, this);
 
+
+
+
+  //wait for the action server to come up
   while(!MoveBaseClient.waitForServer(ros::Duration(5.0))){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
@@ -71,32 +74,29 @@ ROS_INFO("cam: %f", camdist);
 void SendGoal::SendGoalposition(){
 
 
-  //tell the action client that we want to spin a thread by default
-  //wait for the action server to come up
+/***************Send Goal *****************/
 
 
-  //we'll send a goal to the robot to move 1 meter forward
-  goal.target_pose.header.frame_id = "base_link";
-  goal.target_pose.header.stamp = ros::Time::now();
+	  goal.target_pose.header.frame_id = "base_link";
+	  goal.target_pose.header.stamp = ros::Time::now();
 
-  goal.target_pose.pose.position.x = 7.0;
+	  goal.target_pose.pose.position.x = 7.0;
 
-  goal.target_pose.pose.orientation.w = 1.0;
-
-
-  ROS_INFO("Sending goal");
-  MoveBaseClient.sendGoal(goal);
-
-if(MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
- ROS_INFO("Hooray, the base moved 1 meter forward");
-else
- ROS_INFO("The base failed to move forward 1 meter for some reason");
+	  goal.target_pose.pose.orientation.w = 1.0;
 
 
+	  ROS_INFO("Sending goal");
+	  MoveBaseClient.sendGoal(goal);
 
+	if(MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+	 ROS_INFO("Hooray, the base moved 1 meter forward");
+	else
+	 ROS_INFO("The base failed to move forward 1 meter for some reason");
+
+
+/*****************Speed adjust******************/
 
 		   	dynamic_reconfigure::ReconfigureRequest srv_req;
-
     			dynamic_reconfigure::DoubleParameter double_param;
     			dynamic_reconfigure::Config conf; 
 			double_param.name = "max_vel_x";
@@ -112,7 +112,7 @@ else
 
 
 			}
- if(camdist > max_far_distance && max_person_velocity>0.1){
+ 		if(camdist > max_far_distance && max_person_velocity>0.1){
 		
 			max_person_velocity = max_person_velocity - 0.1;
 
