@@ -11,7 +11,25 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   move_base_msgs
   roscpp
+geometry_msgs roscpp rospy std_msgs people_msgs genmsg OpenCV REQUIRED message_generation
 )
+
+
+
+add_message_files(
+  FILES
+  Person.msg
+  PersonArray.msg
+  Leg.msg
+  LegArray.msg
+)
+
+generate_messages(   
+  DEPENDENCIES  
+  std_msgs  
+  geometry_msgs
+)  
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
