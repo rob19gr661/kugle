@@ -1,0 +1,27 @@
+<launch>
+
+<master auto="start"/>
+ <!-- Run the map server --> 
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find map_pkg)/maps/hallway.yaml"/>
+
+
+ <!--- Run AMCL --> 
+    <include file="$(find amcl)/examples/amcl_omni.launch" />
+		<param name="odom_frame_id" value="odom"/>
+		<param name="base_frame_id" value="base_link"/>
+		<param name="use_map_topic" value="true"/>
+		<param name="initial_pose_x" value="-1.25402498245"/> 
+		<param name="initial_pose_y" value="0.0360200405121"/>
+		<param name="initial_pose_a" value="-0.00158882141113"/>
+
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+<remap from="cmd_vel" to="mobile_base/commands/velocity"/>
+ 
+    <rosparam file="$(find turtlebot_2dnav)/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find turtlebot_2dnav)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find turtlebot_2dnav)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find turtlebot_2dnav)/global_costmap_params.yaml" command="load" /> 
+    <rosparam file="$(find turtlebot_2dnav)/base_local_planner_params.yaml" command="load" />
+ </node>
+
+</launch> 
